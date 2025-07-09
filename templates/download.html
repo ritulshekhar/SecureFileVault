@@ -1,0 +1,165 @@
+{% extends "base.html" %}
+
+{% block title %}Download File - SecureShare{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        {% if error %}
+            <!-- Error Message -->
+            <div class="card shadow border-danger">
+                <div class="card-header bg-danger text-white text-center">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-exclamation-triangle"></i> Access Denied
+                    </h3>
+                </div>
+                <div class="card-body text-center">
+                    <div class="alert alert-danger">
+                        {{ error }}
+                    </div>
+                    {% if file_share %}
+                        <div class="mt-4">
+                            <h5>File Information</h5>
+                            <p><strong>Original Name:</strong> {{ file_share.original_filename }}</p>
+                            <p><strong>Size:</strong> {{ "%.2f"|format(file_share.file_size / 1024 / 1024) }} MB</p>
+                            <p><strong>Uploaded:</strong> {{ file_share.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+                            {% if file_share.download_limit %}
+                                <p><strong>Downloads:</strong> {{ file_share.download_count }} / {{ file_share.download_limit }}</p>
+                            {% endif %}
+                            {% if file_share.expires_at %}
+                                <p><strong>Expires:</strong> {{ file_share.expires_at.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+                            {% endif %}
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        {% elif password_required %}
+            <!-- Password Form -->
+            <div class="card shadow">
+                <div class="card-header text-center">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-lock"></i> Password Required
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h5>File Information</h5>
+                        <p><strong>Original Name:</strong> {{ file_share.original_filename }}</p>
+                        <p><strong>Size:</strong> {{ "%.2f"|format(file_share.file_size / 1024 / 1024) }} MB</p>
+                        <p><strong>Uploaded:</strong> {{ file_share.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+                        {% if file_share.download_limit %}
+                            <p><strong>Downloads:</strong> {{ file_share.download_count }} / {{ file_share.download_limit }}</p>
+                        {% endif %}
+                        {% if file_share.expires_at %}
+                            <p><strong>Expires:</strong> {{ file_share.expires_at.strftime('%Y-%m-%d %H:%M:%S') }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <hr>
+                    
+                    <form method="POST">
+                        <div class="mb-3">
+                            <label for="password" class="form-label">
+                                <i class="fas fa-key"></i> Enter Password
+                            </label>
+                            <input type="password" class="form-control" id="password" name="password" required autofocus>
+                        </div>
+                        
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-download"></i> Download File
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        {% elif show_info %}
+            <!-- File Information -->
+            <div class="card shadow">
+                <div class="card-header text-center">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-info-circle"></i> File Information
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-sm-4"><strong>Original Name:</strong></div>
+                        <div class="col-sm-8">{{ file_share.original_filename }}</div>
+                    </div>
+                    <hr>
+                    <div class="row">
+                        <div class="col-sm-4"><strong>Size:</strong></div>
+                        <div class="col-sm-8">{{ "%.2f"|format(file_share.file_size / 1024 / 1024) }} MB</div>
+                    </div>
+                    <hr>
+                    <div class="row">
+                        <div class="col-sm-4"><strong>Uploaded:</strong></div>
+                        <div class="col-sm-8">{{ file_share.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</div>
+                    </div>
+                    
+                    {% if file_share.download_limit %}
+                        <hr>
+                        <div class="row">
+                            <div class="col-sm-4"><strong>Downloads:</strong></div>
+                            <div class="col-sm-8">{{ file_share.download_count }} / {{ file_share.download_limit }}</div>
+                        </div>
+                    {% endif %}
+                    
+                    {% if file_share.expires_at %}
+                        <hr>
+                        <div class="row">
+                            <div class="col-sm-4"><strong>Expires:</strong></div>
+                            <div class="col-sm-8">{{ file_share.expires_at.strftime('%Y-%m-%d %H:%M:%S') }}</div>
+                        </div>
+                    {% endif %}
+                    
+                    {% if file_share.last_accessed %}
+                        <hr>
+                        <div class="row">
+                            <div class="col-sm-4"><strong>Last Access:</strong></div>
+                            <div class="col-sm-8">{{ file_share.last_accessed.strftime('%Y-%m-%d %H:%M:%S') }}</div>
+                        </div>
+                    {% endif %}
+                    
+                    <hr>
+                    <div class="row">
+                        <div class="col-sm-4"><strong>Status:</strong></div>
+                        <div class="col-sm-8">
+                            {% if file_share.is_expired() %}
+                                <span class="badge bg-danger">Expired</span>
+                            {% elif file_share.is_download_limit_reached() %}
+                                <span class="badge bg-warning">Download Limit Reached</span>
+                            {% else %}
+                                <span class="badge bg-success">Available</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    {% if file_share.can_download() %}
+                        <div class="d-grid mt-3">
+                            <a href="{{ url_for('download.download_file', file_id=file_share.file_id) }}" class="btn btn-primary">
+                                <i class="fas fa-download"></i> Download File
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        {% else %}
+            <!-- Default Download Page -->
+            <div class="card shadow">
+                <div class="card-header text-center">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-download"></i> Download File
+                    </h3>
+                </div>
+                <div class="card-body text-center">
+                    <p>File not found or invalid link.</p>
+                    <a href="{{ url_for('index') }}" class="btn btn-primary">
+                        <i class="fas fa-home"></i> Go Home
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

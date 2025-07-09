@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+
+{% block title %}SecureShare - Upload Files{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        {% if session.get('user_id') %}
+            <!-- File Upload Form -->
+            <div class="card shadow">
+                <div class="card-header">
+                    <h3 class="card-title mb-0">
+                        <i class="fas fa-cloud-upload-alt"></i> Upload File
+                    </h3>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('upload.upload_file') }}" enctype="multipart/form-data">
+                        <!-- File Selection -->
+                        <div class="mb-3">
+                            <label for="file" class="form-label">
+                                <i class="fas fa-file"></i> Select File
+                            </label>
+                            <input type="file" class="form-control" id="file" name="file" required>
+                            <div class="form-text">
+                                Maximum file size: 100MB. Supported formats: txt, pdf, images, documents, archives, audio, video.
+                            </div>
+                        </div>
+
+                        <!-- Security Options -->
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="password" class="form-label">
+                                        <i class="fas fa-lock"></i> Password Protection (Optional)
+                                    </label>
+                                    <input type="password" class="form-control" id="password" name="password" placeholder="Enter password">
+                                    <div class="form-text">Leave empty for no password protection.</div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="mb-3">
+                                    <label for="download_limit" class="form-label">
+                                        <i class="fas fa-download"></i> Download Limit (Optional)
+                                    </label>
+                                    <input type="number" class="form-control" id="download_limit" name="download_limit" min="1" placeholder="e.g., 5">
+                                    <div class="form-text">Maximum number of downloads allowed.</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="expiry_hours" class="form-label">
+                                <i class="fas fa-clock"></i> Expiry Time (Optional)
+                            </label>
+                            <input type="number" class="form-control" id="expiry_hours" name="expiry_hours" min="1" placeholder="e.g., 24">
+                            <div class="form-text">Hours after which the link will expire.</div>
+                        </div>
+
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-upload"></i> Upload File
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Quick Stats -->
+            <div class="row mt-4">
+                <div class="col-md-4">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <i class="fas fa-shield-alt fa-2x text-primary mb-2"></i>
+                            <h5 class="card-title">Secure</h5>
+                            <p class="card-text">Password protection and encrypted storage</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <i class="fas fa-clock fa-2x text-info mb-2"></i>
+                            <h5 class="card-title">Expirable</h5>
+                            <p class="card-text">Set custom expiry times for your files</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card text-center">
+                        <div class="card-body">
+                            <i class="fas fa-download fa-2x text-success mb-2"></i>
+                            <h5 class="card-title">Controlled</h5>
+                            <p class="card-text">Limit the number of downloads</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <!-- Welcome Message for Non-Logged In Users -->
+            <div class="text-center">
+                <div class="card shadow">
+                    <div class="card-body py-5">
+                        <i class="fas fa-shield-alt fa-4x text-primary mb-4"></i>
+                        <h1 class="display-4 mb-3">Welcome to SecureShare</h1>
+                        <p class="lead mb-4">
+                            Share your files securely with password protection, download limits, and expiry times.
+                        </p>
+                        <div class="d-grid gap-2 d-md-block">
+                            <a href="{{ url_for('auth.login') }}" class="btn btn-primary btn-lg">
+                                <i class="fas fa-sign-in-alt"></i> Login
+                            </a>
+                            <a href="{{ url_for('auth.register') }}" class="btn btn-outline-primary btn-lg">
+                                <i class="fas fa-user-plus"></i> Register
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Features -->
+                <div class="row mt-5">
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100">
+                            <div class="card-body text-center">
+                                <i class="fas fa-lock fa-3x text-primary mb-3"></i>
+                                <h5 class="card-title">Password Protection</h5>
+                                <p class="card-text">Secure your files with password protection to ensure only authorized users can access them.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100">
+                            <div class="card-body text-center">
+                                <i class="fas fa-hourglass-half fa-3x text-info mb-3"></i>
+                                <h5 class="card-title">Expiry Control</h5>
+                                <p class="card-text">Set custom expiry times for your shared files to automatically limit access duration.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 mb-4">
+                        <div class="card h-100">
+                            <div class="card-body text-center">
+                                <i class="fas fa-chart-line fa-3x text-success mb-3"></i>
+                                <h5 class="card-title">Download Limits</h5>
+                                <p class="card-text">Control how many times your files can be downloaded with customizable download limits.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}
