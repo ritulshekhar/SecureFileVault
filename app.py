@@ -70,6 +70,19 @@ def dashboard():
     files = FileShare.query.filter_by(user_id=user_id).order_by(FileShare.created_at.desc()).all()
     return render_template('dashboard.html', user=user, files=files)
 
+@app.route('/download-project')
+def download_project():
+    """Download the entire project as a zip file"""
+    from flask import send_file
+    import os
+    
+    zip_path = 'secureshare.zip'
+    if os.path.exists(zip_path):
+        return send_file(zip_path, as_attachment=True, download_name='secureshare-project.zip')
+    else:
+        flash('Project zip file not found', 'error')
+        return redirect(url_for('index'))
+
 with app.app_context():
     # Import models to ensure tables are created
     import models
