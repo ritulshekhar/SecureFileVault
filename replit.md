@@ -8,6 +8,11 @@ SecureShare is a Flask-based web application that provides secure file sharing c
 
 Preferred communication style: Simple, everyday language.
 
+## Recent Changes
+
+- **Authentication System Update (July 10, 2025)**: Converted from JWT cookie-based authentication to session-based authentication to resolve cookie access issues during file uploads
+- **README Documentation (July 10, 2025)**: Created comprehensive README.md with installation instructions, usage guide, security considerations, and project structure documentation
+
 ## System Architecture
 
 ### Backend Architecture
