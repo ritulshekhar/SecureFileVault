@@ -65,10 +65,17 @@ def index():
     return render_template('index.html')
 
 @app.route('/dashboard')
-@jwt_required()
 def dashboard():
+    from flask import session
     from models import FileShare, User
-    user_id = get_jwt_identity()
+    
+    # Check if user is logged in via session
+    if 'user_id' not in session:
+        from flask import flash
+        flash('Please login to access dashboard', 'error')
+        return redirect(url_for('auth.login'))
+    
+    user_id = session['user_id']
     user = User.query.get(user_id)
     files = FileShare.query.filter_by(user_id=user_id).order_by(FileShare.created_at.desc()).all()
     return render_template('dashboard.html', user=user, files=files)

@@ -1,5 +1,4 @@
-from flask import Blueprint, request, render_template, redirect, url_for, flash, session, make_response
-from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, unset_jwt_cookies, set_access_cookies
+from flask import Blueprint, request, render_template, redirect, url_for, flash, session
 from werkzeug.security import generate_password_hash
 from app import db
 from models import User
@@ -20,20 +19,12 @@ def login():
         user = User.query.filter_by(username=username).first()
         
         if user and user.check_password(password):
-            # Create JWT token
-            access_token = create_access_token(identity=user.id)
-            
-            # Store token in session for template access
-            session['access_token'] = access_token
+            # Store user info in session
             session['user_id'] = user.id
             session['username'] = user.username
             
-            # Create response with JWT cookie
-            response = make_response(redirect(url_for('dashboard')))
-            set_access_cookies(response, access_token)
-            
             flash('Login successful', 'success')
-            return response
+            return redirect(url_for('dashboard'))
         else:
             flash('Invalid username or password', 'error')
     
@@ -86,21 +77,20 @@ def register():
     return render_template('login.html', show_register=True)
 
 @auth_bp.route('/logout')
-@jwt_required()
 def logout():
     # Clear session
     session.clear()
     
-    # Create response and unset JWT cookies
-    response = make_response(redirect(url_for('index')))
-    unset_jwt_cookies(response)
-    
     flash('You have been logged out', 'info')
-    return response
+    return redirect(url_for('index'))
 
 @auth_bp.route('/profile')
-@jwt_required()
 def profile():
-    user_id = get_jwt_identity()
+    # Check if user is logged in via session
+    if 'user_id' not in session:
+        flash('Please login to view profile', 'error')
+        return redirect(url_for('auth.login'))
+    
+    user_id = session['user_id']
     user = User.query.get(user_id)
     return render_template('profile.html', user=user)

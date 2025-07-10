@@ -1,7 +1,6 @@
 import os
 from datetime import datetime, timedelta, timezone
-from flask import Blueprint, request, flash, redirect, url_for, render_template, current_app
-from flask_jwt_extended import jwt_required, get_jwt_identity
+from flask import Blueprint, request, flash, redirect, url_for, render_template, current_app, session
 from werkzeug.utils import secure_filename
 from werkzeug.exceptions import RequestEntityTooLarge
 from app import db
@@ -29,8 +28,11 @@ def generate_secure_filename(original_filename):
     return f"{secure_name}_{timestamp}_{random_suffix}{ext}"
 
 @upload_bp.route('/upload', methods=['GET', 'POST'])
-@jwt_required()
 def upload_file():
+    # Check if user is logged in via session
+    if 'user_id' not in session:
+        flash('Please login to upload files', 'error')
+        return redirect(url_for('auth.login'))
     if request.method == 'POST':
         try:
             # Check if file was uploaded
@@ -95,7 +97,7 @@ def upload_file():
                 file_size=file_size,
                 download_limit=download_limit,
                 expires_at=expires_at,
-                user_id=get_jwt_identity()
+                user_id=session['user_id']
             )
             
             # Set password if provided
@@ -122,10 +124,14 @@ def upload_file():
     return render_template('index.html')
 
 @upload_bp.route('/delete/<file_id>', methods=['POST'])
-@jwt_required()
 def delete_file(file_id):
     """Delete a file share"""
-    user_id = get_jwt_identity()
+    # Check if user is logged in via session
+    if 'user_id' not in session:
+        flash('Please login to delete files', 'error')
+        return redirect(url_for('auth.login'))
+    
+    user_id = session['user_id']
     file_share = FileShare.query.filter_by(file_id=file_id, user_id=user_id).first()
     
     if not file_share:
