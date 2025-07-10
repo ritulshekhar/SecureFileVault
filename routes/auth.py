@@ -1,5 +1,5 @@
-from flask import Blueprint, request, render_template, redirect, url_for, flash, session
-from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, unset_jwt_cookies
+from flask import Blueprint, request, render_template, redirect, url_for, flash, session, make_response
+from flask_jwt_extended import create_access_token, jwt_required, get_jwt_identity, unset_jwt_cookies, set_access_cookies
 from werkzeug.security import generate_password_hash
 from app import db
 from models import User
@@ -28,8 +28,12 @@ def login():
             session['user_id'] = user.id
             session['username'] = user.username
             
+            # Create response with JWT cookie
+            response = make_response(redirect(url_for('dashboard')))
+            set_access_cookies(response, access_token)
+            
             flash('Login successful', 'success')
-            return redirect(url_for('dashboard'))
+            return response
         else:
             flash('Invalid username or password', 'error')
     
@@ -88,7 +92,7 @@ def logout():
     session.clear()
     
     # Create response and unset JWT cookies
-    response = redirect(url_for('index'))
+    response = make_response(redirect(url_for('index')))
     unset_jwt_cookies(response)
     
     flash('You have been logged out', 'info')

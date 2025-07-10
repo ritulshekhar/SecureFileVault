@@ -4,7 +4,7 @@ from datetime import timedelta
 
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
-from flask_jwt_extended import JWTManager
+from flask_jwt_extended import JWTManager, set_access_cookies
 from sqlalchemy.orm import DeclarativeBase
 from werkzeug.middleware.proxy_fix import ProxyFix
 
@@ -24,6 +24,9 @@ app.wsgi_app = ProxyFix(app.wsgi_app, x_proto=1, x_host=1)
 # JWT Configuration
 app.config["JWT_SECRET_KEY"] = os.environ.get("JWT_SECRET_KEY", "jwt-secret-key")
 app.config["JWT_ACCESS_TOKEN_EXPIRES"] = timedelta(hours=24)
+app.config["JWT_TOKEN_LOCATION"] = ["cookies"]
+app.config["JWT_COOKIE_SECURE"] = False  # Set to True in production with HTTPS
+app.config["JWT_COOKIE_CSRF_PROTECT"] = False  # Simplified for development
 jwt = JWTManager(app)
 
 # Database configuration
