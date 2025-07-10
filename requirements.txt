@@ -6,4 +6,4 @@ SQLAlchemy==2.0.41
 Werkzeug==3.1.3
 email-validator==2.2.0
 gunicorn==23.0.0
-vercel_wsgi
+vercel-python-wsgi
